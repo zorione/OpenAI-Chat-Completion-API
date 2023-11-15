@@ -38,7 +38,7 @@ This is a Flask API with an endpoint that interfaces with the OpenAI Chat Comple
 3. Set up environment variables:
 
     - Set your OpenAI API key as `OPENAI_API_KEY` environment variable.
-    For Windos:
+    For Windows:
     ```bash
     set OPENAI_API_KEY=YOUR_ACTUAL_API_KEY
     ```
