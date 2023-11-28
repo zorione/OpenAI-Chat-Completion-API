@@ -9,8 +9,9 @@ from datetime import datetime
 import openai
 
 app = Flask(__name__)
-api_key = os.environ.get('OPENAI_API_KEY')
-
+# api_key = 'sk-'
+api_key = os.environ.get('OPENAI_API_KEY'))
+print(api_key)
 conn = sqlite3.connect('chat_logs.db', check_same_thread=False)
 c = conn.cursor()
 c.execute('''CREATE TABLE IF NOT EXISTS chat_logs 
@@ -24,10 +25,11 @@ conn.commit()
 def generate_user_id():
     return str(uuid.uuid4())
 
-limiter = Limiter(get_remote_address, app=app, default_limits=["5 per minute"])
+limiter = Limiter(app=app, key_func=get_remote_address, default_limits=["5 per minute"])
 
 @app.route('/openai-completion', methods=['POST'])
 @limiter.limit("2 per minute")
+
 def chat():
     data = request.get_json()
     user_id = data.get('user_id')
@@ -56,14 +58,15 @@ def chat():
         conn.commit()
 
         return jsonify({'user_id': user_id, 'completion': message_content}), 200
-    
-    except openai.error.OpenAIError as e:
-        error_message = str(e)
-        return jsonify({'error': error_message}), 500
 
     except Exception as e:
-        error_message = str(e)
-        return jsonify({'error': error_message}), 500
+        if isinstance(e, openai.OpenAIError):
+            error_message = str(e)
+            return jsonify({'error': error_message}), 500
+        else:
+            # Handle other exceptions
+            error_message = str(e)
+            return jsonify({'error': error_message}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
